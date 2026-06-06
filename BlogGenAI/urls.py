@@ -15,11 +15,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from seo_analyser import views as seo_views
 
 from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # This includes all core app URLs at root
+    path('', include('core.urls')),
+    path('seo-analyser/', include('seo_analyser.urls')),
+    path('api/seo-analyse/', seo_views.analyse_seo, name='api_seo_analyse'),
+    
 ]
