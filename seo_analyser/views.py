@@ -25,9 +25,7 @@ def analyse_seo(request):
 
         if not content:
             return JsonResponse({'success': False, 'error': 'Content is required.'}, status=400)
-        if not target_keyword:
-            return JsonResponse({'success': False, 'error': 'Target keyword is required.'}, status=400)
-
+        
         if input_type == 'url':
             content_block = f"URL to analyse: {content}"
         else:

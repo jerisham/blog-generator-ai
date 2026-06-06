@@ -89,21 +89,28 @@ def seo_analyze(request):
     try:
         data = json.loads(request.body)
         content = data.get('content', '').strip()
-        target_keyword = data.get('target_keyword', '').strip()
-        meta_title = data.get('meta_title', '').strip()
+        target_keyword = data.get('keyword', data.get('target_keyword', '')).strip()
+        meta_title = data.get('meta_title', data.get('title', '')).strip()
         meta_description = data.get('meta_description', '').strip()
 
         if not content:
             return JsonResponse({'success': False, 'error': 'Content is required'}, status=400)
 
         if not target_keyword:
-            target_keyword = 'general'
+            target_keyword = 'AUTO_DETECT'
 
         seo_prompt = f"""You are an expert SEO analyst. Analyse the blog content below and return a structured JSON object only. No markdown fences, no extra text, just raw JSON.
+SCORING GUIDANCE FOR RECOMMENDATIONS:
+- If score is 0-40 (poor): Give only 2-3 critical issues that have the biggest impact. Suggestions should focus purely on fixing broken fundamentals.
+- If score is 41-70 (medium): Give 3-4 issues focused on what is holding the score back. Suggestions should target specific improvements to reach a high score.
+- If score is 71-100 (good): Give 2-3 fine-tuning issues. Suggestions should focus on polishing details to reach a perfect score.
+Keep recommendations focused and actionable — quality over quantity.
 
 TARGET KEYWORD: {target_keyword}
+If TARGET KEYWORD is AUTO_DETECT, identify the primary keyword/topic from the content first and then perform the SEO analysis based on that topic.
 META TITLE: {meta_title or '(not provided)'}
-META DESCRIPTION: {meta_description or '(not provided)'}
+If no meta title or meta description is provided, do not penalize the SEO score for missing metadata.
+Evaluate only the content itself.
 
 CONTENT:
 {content[:6000]}
@@ -122,19 +129,15 @@ Return ONLY this JSON structure with real scores based on the content:
     {{"title": "Link Signals", "value": <0-100>, "icon": "link", "icon_class": "icon-cyan", "description": "<specific finding>"}}
   ],
   "issues": [
-    {{"severity": "high", "title": "<issue>", "detail": "<why it matters and how to fix it>"}}
+    {{"severity": "high|medium|low", "title": "<issue>", "detail": "<why it matters and how to fix it>"}}
   ],
   "suggestions": [
-    "<actionable suggestion 1>",
-    "<actionable suggestion 2>",
-    "<actionable suggestion 3>",
-    "<actionable suggestion 4>"
+    "<actionable suggestion>"
   ],
   "keywords_found": [
     {{"word": "<keyword found in content>", "type": "primary"}}
   ],
   "keywords_missing": ["<related keyword not in content>", "<another missing keyword>"],
-  "full_report": "<detailed markdown SEO report with ## headings covering: Overview, Keyword Analysis, Readability, Structure, Meta Data, Recommendations. At least 400 words.>"
 }}"""
 
         last_error = None
@@ -159,34 +162,47 @@ Return ONLY this JSON structure with real scores based on the content:
 
                 if response.status_code == 200:
                     raw = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
-                    raw = re.sub(r'^```(?:json)?\s*', '', raw)
-                    raw = re.sub(r'\s*```$', '', raw)
+                    raw = re.sub(r'```(?:json)?\s*', '', raw)
+                    raw = re.sub(r'```', '', raw)
                     raw = raw.strip()
+                    match = re.search(r'\{.*\}', raw, re.DOTALL)
+                    if match:
+                        raw = match.group(0)
 
                     try:
                         parsed = json.loads(raw)
                         parsed['success'] = True
                         return JsonResponse(parsed)
                     except json.JSONDecodeError:
-                        return JsonResponse({
-                            'success': True,
-                            'score': 50,
-                            'headline': 'Analysis Complete',
-                            'summary': 'SEO analysis completed. See full report below.',
-                            'metrics': [
-                                {'title': 'Keyword Density', 'value': 50, 'icon': 'percent', 'icon_class': 'icon-blue', 'description': 'See full report'},
-                                {'title': 'Readability', 'value': 50, 'icon': 'book-open', 'icon_class': 'icon-green', 'description': 'See full report'},
-                                {'title': 'Content Length', 'value': 50, 'icon': 'align-left', 'icon_class': 'icon-amber', 'description': 'See full report'},
-                                {'title': 'Title & Meta', 'value': 50, 'icon': 'heading', 'icon_class': 'icon-purple', 'description': 'See full report'},
-                                {'title': 'Structure', 'value': 50, 'icon': 'list-ul', 'icon_class': 'icon-pink', 'description': 'See full report'},
-                                {'title': 'Link Signals', 'value': 50, 'icon': 'link', 'icon_class': 'icon-cyan', 'description': 'See full report'}
-                            ],
-                            'issues': [],
-                            'suggestions': [],
-                            'keywords_found': [],
-                            'keywords_missing': [],
-                            'full_report': raw
-                        })
+                        # JSON parsing failed — strip the full_report field which often breaks parsing
+                        try:
+                            report_match = re.search(r'"full_report"\s*:\s*"(.*?)"\s*[,}]', raw, re.DOTALL)
+                            full_report = report_match.group(1) if report_match else ''
+                            raw_no_report = re.sub(r'"full_report"\s*:\s*".*?"\s*([,}])', r'"full_report": "See below"\1', raw, flags=re.DOTALL)
+                            parsed = json.loads(raw_no_report)
+                            parsed['full_report'] = full_report
+                            parsed['success'] = True
+                            return JsonResponse(parsed)
+                        except Exception:
+                            return JsonResponse({
+                                'success': True,
+                                'score': 50,
+                                'headline': 'Analysis Complete',
+                                'summary': 'SEO analysis completed. See full report below.',
+                                'metrics': [
+                                    {'title': 'Keyword Density', 'value': 50, 'icon': 'percent', 'icon_class': 'icon-blue', 'description': 'See full report'},
+                                    {'title': 'Readability', 'value': 50, 'icon': 'book-open', 'icon_class': 'icon-green', 'description': 'See full report'},
+                                    {'title': 'Content Length', 'value': 50, 'icon': 'align-left', 'icon_class': 'icon-amber', 'description': 'See full report'},
+                                    {'title': 'Title & Meta', 'value': 50, 'icon': 'heading', 'icon_class': 'icon-purple', 'description': 'See full report'},
+                                    {'title': 'Structure', 'value': 50, 'icon': 'list-ul', 'icon_class': 'icon-pink', 'description': 'See full report'},
+                                    {'title': 'Link Signals', 'value': 50, 'icon': 'link', 'icon_class': 'icon-cyan', 'description': 'See full report'}
+                                ],
+                                'issues': [],
+                                'suggestions': [],
+                                'keywords_found': [],
+                                'keywords_missing': [],
+                                'full_report': raw
+                            })
 
                 last_error = response_data.get('error', {}).get('message', 'Unknown error')
 
