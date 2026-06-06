@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "BlogGenAI/asgi.py",
+      "src": "BlogGenAI/wsgi.py",
       "use": "@vercel/python",
       "config": { "maxLambdaSize": "15mb" }
     }
@@ -10,7 +10,7 @@
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "BlogGenAI/asgi.py"
+      "dest": "BlogGenAI/wsgi.py"
     }
   ]
 }
