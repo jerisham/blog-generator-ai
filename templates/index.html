@@ -8,22 +8,22 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #10b981;
-            --accent: #f59e0b;
-            --bg-dark: #0f172a;
-            --bg-card: #1e293b;
-            --bg-input: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #334155;
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-light: #a78bfa;
+            --secondary: #059669;
+            --accent: #d97706;
+            --bg-dark: #faf9fe;
+            --bg-card: #ffffff;
+            --bg-input: #f5f3ff;
+            --text-primary: #1e1b4b;
+            --text-secondary: #4f46e5;
+            --text-muted: #747d8c;
+            --border: #e8e6f5;
             --success: #10b981;
             --error: #ef4444;
-            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
-            --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+            --gradient-1: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --shadow-glow: 0 4px 6px -1px rgba(124, 58, 237, 0.03), 0 2px 4px -1px rgba(124, 58, 237, 0.02), 0 20px 25px -5px rgba(124, 58, 237, 0.05);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -39,29 +39,21 @@
             width: 100%; height: 100%;
             z-index: -1;
             overflow: hidden;
-        }
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            width: 150%; height: 150%;
-            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 50% 80%, rgba(217, 70, 239, 0.06) 0%, transparent 50%);
-            animation: bgFloat 20s ease-in-out infinite;
-        }
-        @keyframes bgFloat {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(-2%, 2%) rotate(1deg); }
-            66% { transform: translate(2%, -1%) rotate(-1deg); }
+            background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
+            opacity: 0.6;
         }
         .navbar {
             position: fixed;
             top: 0;
             width: 100%;
             padding: 1rem 2rem;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            background: linear-gradient(135deg, rgba(8, 8, 10, 0.92) 0%, rgba(18, 18, 22, 0.8) 100%);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: none;
+            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             z-index: 1000;
             display: flex;
             justify-content: space-between;
@@ -75,17 +67,18 @@
             font-weight: 800;
             background: var(--gradient-1);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .logo i { font-size: 1.75rem; -webkit-text-fill-color: #6366f1; }
+        .logo i { font-size: 1.75rem; -webkit-text-fill-color: #7c3aed; }
         .nav-links { display: flex; gap: 2rem; align-items: center; }
         .nav-links a {
-            color: var(--text-secondary);
+            color: white;
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s;
         }
-        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
         .user-menu { display: flex; align-items: center; gap: 1rem; }
         .btn {
             padding: 0.625rem 1.25rem;
@@ -102,11 +95,11 @@
         .btn-primary {
             background: var(--gradient-1);
             color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
         }
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
         }
         .btn-secondary {
             background: var(--bg-card);
@@ -115,13 +108,14 @@
         }
         .btn-secondary:hover {
             background: var(--bg-input);
+            color: var(--primary);
             border-color: var(--primary-light);
         }
         .btn-ghost {
+            color: white;
             background: transparent;
-            color: var(--text-secondary);
         }
-        .btn-ghost:hover { color: var(--text-primary); }
+        .btn-ghost:hover { color: var(--primary);}
         .main-container {
             display: flex;
             margin-top: 70px;
@@ -156,17 +150,18 @@
             border-radius: 0.75rem;
             cursor: pointer;
             transition: all 0.3s;
-            color: var(--text-secondary);
+            color: var(--text-primary);
             text-decoration: none;
+            font-weight: 500;
         }
         .sidebar-item:hover {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--text-primary);
+            background: var(--bg-input);
+            color: var(--primary);
         }
         .sidebar-item.active {
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--primary-light);
-            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(124, 58, 237, 0.06);
+            color: var(--primary);
+            border: 1px solid rgba(124, 58, 237, 0.1);
         }
         .sidebar-item i { width: 20px; text-align: center; }
         .sidebar-item .badge {
@@ -189,17 +184,18 @@
         .feature-progress {
             margin-top: auto;
             padding: 1rem;
-            background: rgba(99, 102, 241, 0.05);
+            background: var(--bg-input);
             border-radius: 1rem;
-            border: 1px solid rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--border);
         }
         .feature-progress h4 {
             font-size: 0.875rem;
             margin-bottom: 0.5rem;
+            color: var(--text-primary);
         }
         .progress-bar {
             height: 6px;
-            background: var(--bg-input);
+            background: var(--border);
             border-radius: 9999px;
             overflow: hidden;
             margin-bottom: 0.5rem;
@@ -216,6 +212,16 @@
             flex: 1;
             padding: 2rem;
             max-width: calc(100% - 280px);
+            background-color: #e3dcff; /* Deeper base lavender */
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(186, 176, 253, 0.95) 0px, transparent 60%),  /* Vibrant Periwinkle Blue */
+                radial-gradient(at 90% 10%, rgba(243, 172, 243, 0.95) 0px, transparent 65%),  /* Saturated Cotton-Candy Pink */
+                radial-gradient(at 50% 80%, rgba(199, 210, 254, 0.9) 0px, transparent 60%),   /* Clear Sky Blue core */
+                radial-gradient(at 95% 85%, rgba(235, 203, 253, 0.95) 0px, transparent 50%),  /* Rich Lilac purple glow */
+                radial-gradient(at 5% 85%, rgba(220, 229, 255, 0.85) 0px, transparent 50%);   /* Subtle soft light balance */
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: inset 1px 1px 6px rgba(0, 0, 0, 0.02);
+            min-height: calc(100vh - 70px);
         }
         .hero {
             text-align: center;
@@ -226,13 +232,12 @@
             font-size: 3rem;
             font-weight: 800;
             margin-bottom: 1rem;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
         }
         .hero p {
             font-size: 1.125rem;
-            color: var(--text-secondary);
+            color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.7;
@@ -251,26 +256,33 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
         }
         .generator-header h2 {
             font-size: 1.25rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            color: var(--text-primary);
         }
-        .generator-header h2 i { color: var(--primary-light); }
+        .generator-header h2 i { color: var(--primary); }
         .api-status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.875rem;
-            color: var(--text-muted);
+            color: var(--primary);
+            background: var(--bg-input);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
         }
         .status-dot {
             width: 8px; height: 8px;
             border-radius: 50%;
             background: var(--success);
-            box-shadow: 0 0 10px var(--success);
+            box-shadow: 0 0 8px var(--success);
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
@@ -283,12 +295,13 @@
             margin-bottom: 0.5rem;
             font-weight: 600;
             font-size: 0.875rem;
+            color: var(--text-primary);
         }
         .form-label span { color: var(--text-muted); font-weight: 400; }
         .form-input, .form-textarea, .form-select {
             width: 100%;
             padding: 0.875rem 1rem;
-            background: var(--bg-input);
+            background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 0.75rem;
             color: var(--text-primary);
@@ -299,7 +312,7 @@
         .form-input:focus, .form-textarea:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
         }
         .form-textarea {
             min-height: 120px;
@@ -323,44 +336,61 @@
         }
         .tone-option {
             padding: 0.75rem;
-            background: var(--bg-input);
-            border: 2px solid var(--border);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
             border-radius: 0.75rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 0.875rem;
+            color: var(--text-primary);
+            font-weight: 500;
         }
         .tone-option:hover {
             border-color: var(--primary-light);
-            background: rgba(99, 102, 241, 0.1);
+            background: var(--bg-input);
         }
         .tone-option.selected {
             border-color: var(--primary);
-            background: rgba(99, 102, 241, 0.15);
-            color: var(--primary-light);
+            background: rgba(124, 58, 237, 0.05);
+            color: var(--primary);
         }
         .tone-option i { display: block; font-size: 1.25rem; margin-bottom: 0.25rem; }
+        
+        /* Redesigned Button - Clean, Modern, Balanced Layout */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
         .generate-btn {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1rem;
-            margin-top: 1rem;
+            width: auto;
+            min-width: 240px;
+            padding: 0.875rem 2.5rem;
+            font-size: 0.95rem;
+            border-radius: 50px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--gradient-1);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
             position: relative;
             overflow: hidden;
         }
-        .generate-btn::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.35);
         }
-        .generate-btn:hover::before { left: 100%; }
+        .generate-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
         .generate-btn:disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
+            box-shadow: none;
         }
         .generate-btn .spinner {
             display: none;
@@ -373,6 +403,7 @@
         .generate-btn.loading .spinner { display: inline-block; }
         .generate-btn.loading .btn-text { display: none; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
         .output-section {
             margin-top: 2rem;
             display: none;
@@ -390,19 +421,21 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
         }
         .output-actions { display: flex; gap: 0.5rem; }
         .output-content {
-            background: var(--bg-dark);
+            background: var(--bg-input);
             border: 1px solid var(--border);
             border-radius: 1rem;
             padding: 2rem;
             min-height: 300px;
             line-height: 1.8;
-            color: var(--text-secondary);
+            color: var(--text-primary);
         }
         .output-content h1, .output-content h2, .output-content h3 {
-            color: var(--text-primary);
+            color: var(--primary-dark);
             margin: 1.5rem 0 0.75rem;
         }
         .output-content p { margin-bottom: 1rem; }
@@ -422,7 +455,7 @@
             align-items: center;
             margin-bottom: 1.5rem;
         }
-        .section-header h3 { font-size: 1.25rem; }
+        .section-header h3 { font-size: 1.25rem; color: var(--text-primary); }
         .history-grid { display: grid; gap: 1rem; }
         .history-item {
             background: var(--bg-card);
@@ -434,20 +467,23 @@
             align-items: center;
             transition: all 0.3s;
             cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
         }
         .history-item:hover {
             border-color: var(--primary-light);
-            transform: translateX(5px);
+            transform: translateX(4px);
         }
-        .history-info h4 { font-size: 0.9375rem; margin-bottom: 0.25rem; }
+        .history-info h4 { font-size: 0.9375rem; margin-bottom: 0.25rem; color: var(--text-primary); }
         .history-info p { font-size: 0.8125rem; color: var(--text-muted); }
         .history-meta { display: flex; align-items: center; gap: 1rem; }
         .history-tag {
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary-light);
+            background: var(--bg-input);
+            color: var(--primary);
             padding: 0.25rem 0.75rem;
             border-radius: 9999px;
             font-size: 0.75rem;
+            border: 1px solid var(--border);
+            font-weight: 500;
         }
         .toast {
             position: fixed;
@@ -459,11 +495,12 @@
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.08);
             transform: translateY(100px);
             opacity: 0;
             transition: all 0.3s;
             z-index: 9999;
+            color: var(--text-primary);
         }
         .toast.show {
             transform: translateY(0);
@@ -480,10 +517,11 @@
             .hero h1 { font-size: 2rem; }
             .form-row { grid-template-columns: 1fr; }
             .tone-grid { grid-template-columns: 1fr 1fr; }
+            .generate-btn { width: 100%; min-width: unset; }
         }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-dark); }
-        ::-webkit-scrollbar-thumb { background: var(--bg-input); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
     </style>
 </head>
@@ -591,7 +629,7 @@
 
                 <form id="blogForm" onsubmit="return false;">
                     <div class="form-group">
-                        <label class="form-label">Blog Topic / Title <span>*</span></label>
+                        <label class="form-label">Blog Name / Title <span>*</span></label>
                         <input type="text" class="form-input" id="topic" placeholder="e.g., The Future of Artificial Intelligence in Healthcare" required>
                     </div>
 
@@ -640,10 +678,12 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-primary generate-btn" id="generateBtn">
-                        <span class="spinner"></span>
-                        <span class="btn-text"><i class="fas fa-bolt"></i> Generate Blog Post</span>
-                    </button>
+                    <div class="btn-container">
+                        <button type="button" class="btn generate-btn" id="generateBtn">
+                            <span class="spinner"></span>
+                            <span class="btn-text">Generate Blog Post</span>
+                        </button>
+                    </div>
                 </form>
 
                 <div class="output-section" id="outputSection">
@@ -805,7 +845,7 @@
             }
         });
 
-        // Format content with markdown-like rendering
+        // Safe format content parser
         function formatContent(text) {
             if (!text) return '';
             return text
@@ -815,7 +855,6 @@
                 .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
                 .replace(/\*(.*)\*/gim, '<em>$1</em>')
                 .replace(/^- (.*$)/gim, '<ul><li>$1</li></ul>')
-                .replace(/<<\/ul>\s*<<ul>/g, '')
                 .replace(/\n/gim, '<br>');
         }
 
