@@ -14,8 +14,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.enums import TA_CENTER
 
-load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+load_dotenv()  # safe no-op on Vercel
 
 GEMINI_MODELS = [
     "gemini-2.0-flash",
@@ -29,11 +28,16 @@ def get_gemini_url(model):
 
 def index(request):
     return render(request, 'index.html')
-
+def debug_env(request):
+    key = os.environ.get('GEMINI_API_KEY', '')
+    return JsonResponse({'key_set': bool(key), 'key_preview': key[:6] + '...' if key else 'MISSING'})
 
 @csrf_exempt
 @require_http_methods(["POST"])
 def generate_blog(request):
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+    if not GEMINI_API_KEY:
+        return JsonResponse({'success': False, 'error': 'API key not configured'}, status=500)
     try:
         data = json.loads(request.body)
         if not data.get('topic'):
@@ -86,6 +90,9 @@ def generate_blog(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def seo_analyze(request):
+    GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
+    if not GEMINI_API_KEY:
+        return JsonResponse({'success': False, 'error': 'API key not configured'}, status=500)
     try:
         data = json.loads(request.body)
         content = data.get('content', '').strip()
