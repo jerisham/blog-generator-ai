@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogGenAI - AI-Powered Blog Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-light: #a78bfa;
+            --secondary: #059669;
+            --accent: #d97706;
+            --bg-dark: #faf9fe;
+            --bg-card: #ffffff;
+            --bg-input: #f5f3ff;
+            --text-primary: #1e1b4b;
+            --text-secondary: #4f46e5;
+            --text-muted: #3A3E46;
+            --border: #e8e6f5;
+            --success: #10b981;
+            --error: #ef4444;
+            --green: #4ade80;
+            --red: #f87171;
+            --yellow: #fbbf24;
+            --gradient-1: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+            --shadow-glow: 0 4px 6px -1px rgba(124, 58, 237, 0.03), 0 2px 4px -1px rgba(124, 58, 237, 0.02), 0 20px 25px -5px rgba(124, 58, 237, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background-image: radial-gradient(var(--border) 1.5px, transparent 1.5px);
+            background-size: 32px 32px;
+            opacity: 0.6;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, rgba(8, 8, 10, 0.92) 0%, rgba(18, 18, 22, 0.8) 100%);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            box-shadow: 0 6px 9px rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-family: Helvetica;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: default;
+            user-select: none;
+        }
+        .logo i { font-size: 1.75rem; -webkit-text-fill-color: #7c3aed; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
+        }
+        .btn-secondary {
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            font-size: 15px;
+        }
+        .btn-secondary:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-ghost {
+            color: white;
+            background: transparent;
+        }
+        .btn-ghost:hover { color: var(--primary); }
+        .btn-view {
+            color: black;
+            letter-spacing: 0.4px;
+            background: transparent;
+        }
+        .main-container {
+            display: flex;
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+        }
+        .sidebar {
+            width: 270px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: fixed;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .sidebar-item:hover {
+            background: var(--bg-input);
+            color: var(--primary);
+        }
+        .sidebar-item.active {
+            background: rgba(124, 58, 237, 0.06);
+            color: var(--primary);
+            border: 1px solid rgba(124, 58, 237, 0.1);
+        }
+        .sidebar-item i { width: 20px; text-align: center; }
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .sidebar-item .soon-badge {
+            margin-left: auto;
+            background: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+        }
+        .feature-progress {
+            margin-top: auto;
+            padding: 1rem;
+            background: var(--bg-input);
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+        }
+        .feature-progress h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 25%;
+            background: var(--gradient-1);
+            border-radius: 9999px;
+        }
+        .feature-progress p { font-size: 0.75rem; color: var(--text-muted); }
+        .content {
+            margin-left: 270px;
+            flex: 1;
+            padding: 2rem;
+            max-width: calc(100% - 270px);
+            background-color: #e3dcff;
+            background-image:
+                radial-gradient(at 10% 20%, rgba(186, 176, 253, 0.95) 0px, transparent 60%),
+                radial-gradient(at 90% 10%, rgba(243, 172, 243, 0.95) 0px, transparent 65%),
+                radial-gradient(at 50% 80%, rgba(199, 210, 254, 0.9) 0px, transparent 60%),
+                radial-gradient(at 95% 85%, rgba(235, 203, 253, 0.95) 0px, transparent 50%),
+                radial-gradient(at 5% 85%, rgba(220, 229, 255, 0.85) 0px, transparent 50%);
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: inset 1px 1px 6px rgba(0, 0, 0, 0.02);
+            min-height: calc(100vh - 70px);
+        }
+        .hero {
+            text-align: center;
+            padding: 2rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            font-size: 1.125rem;
+            color: rgba(0, 0, 0, 0.7);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        .generator-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-glow);
+        }
+        .generator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .generator-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-primary);
+        }
+        .generator-header h2 i { color: var(--primary); }
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--primary);
+            background: var(--bg-input);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+        }
+        .form-label span { color: var(--text-muted); font-weight: 400; }
+        .form-label span.required { color: var(--error); font-weight: 400; }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+        }
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        .tone-option {
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+        .tone-option:hover {
+            border-color: var(--primary-light);
+            background: var(--bg-input);
+        }
+        .tone-option.selected {
+            border-color: var(--primary);
+            background: rgba(124, 58, 237, 0.05);
+            color: var(--primary);
+        }
+        .tone-option i { display: block; font-size: 1.25rem; margin-bottom: 0.25rem; }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        .generate-btn {
+            width: auto;
+            height: 50px;
+            min-width: 240px;
+            padding: 0.875rem 2.5rem;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--gradient-1);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(124, 58, 237, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.35);
+        }
+        .generate-btn:active:not(:disabled) { transform: translateY(0); }
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .generate-btn .spinner {
+            display: none;
+            width: 20px; height: 20px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .generate-btn.loading .spinner { display: inline-block; }
+        .generate-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .output-section {
+            margin-top: 2rem;
+            display: none;
+        }
+        .output-section.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .output-actions { display: flex; gap: 0.5rem; }
+        .output-content {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            min-height: 300px;
+            line-height: 1.8;
+            color: var(--text-primary);
+        }
+        .output-content h1, .output-content h2, .output-content h3 {
+            color: black;
+            margin-top: 0px !important;
+            margin-bottom: 4px !important;
+            line-height: 1.2 !important;
+        }
+        .output-content p { margin-bottom: 1rem; }
+        .output-content ul, .output-content ol {
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        .history-section {
+            margin-top: 3rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .section-header h3 { font-size: 1.25rem; color: var(--text-primary); }
+        .history-grid { display: grid; gap: 1rem; }
+        .history-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+        }
+        .history-item:hover {
+            border-color: var(--primary-light);
+            transform: translateX(4px);
+        }
+        .history-info h4 { font-size: 0.9375rem; margin-bottom: 0.25rem; color: var(--text-primary); }
+        .history-info p { font-size: 0.8125rem; color: var(--text-muted); }
+        .history-meta { display: flex; align-items: center; gap: 1rem; }
+        .history-tag {
+            background: var(--bg-input);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
+            font-weight: 500;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.08);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 9999;
+            color: var(--text-primary);
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--error); }
+
+        /* ── SEO ANALYSER STYLES ── */
+        .seo-tab-row {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+        .seo-tab-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82rem;
+            font-weight: 500;
+            padding: 0.45rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .seo-tab-btn:hover { color: var(--text-primary); background: var(--bg-input); }
+        .seo-tab-btn.active {
+            color: var(--primary);
+            background: rgba(124, 58, 237, 0.08);
+            border-color: rgba(124, 58, 237, 0.25);
+        }
+        .seo-tab-panel { display: none; }
+        .seo-tab-panel.active { display: block; }
+
+        /* SEO score ring */
+        .seo-score-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .seo-score-ring-wrap { position: relative; flex-shrink: 0; }
+        .seo-score-ring-wrap svg { display: block; }
+        .seo-score-label {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+        }
+        .seo-score-number {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .seo-score-max { font-size: 0.7rem; color: var(--text-muted); }
+        .seo-score-meta { flex: 1; min-width: 180px; }
+        .seo-score-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            color: var(--text-primary);
+        }
+        .seo-score-verdict { font-size: 0.875rem; color: var(--text-muted); line-height: 1.5; }
+        .seo-score-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+        .seo-badge {
+            font-size: 0.7rem;
+            font-weight: 500;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            border: 1px solid;
+        }
+        .seo-badge.good  { color: #16a34a; background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.3); }
+        .seo-badge.warn  { color: #b45309; background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.3); }
+        .seo-badge.bad   { color: #dc2626; background: rgba(248,113,113,.1); border-color: rgba(248,113,113,.3); }
+
+        /* SEO metrics grid */
+        .seo-metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .seo-metric-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.1rem 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .seo-metric-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 1rem 1rem 0 0;
+        }
+        .seo-metric-card.good::before { background: var(--green); }
+        .seo-metric-card.warn::before { background: var(--yellow); }
+        .seo-metric-card.bad::before  { background: var(--red); }
+        .seo-metric-icon { font-size: 1.35rem; margin-bottom: 0.4rem; }
+        .seo-metric-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+        .seo-metric-value { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .seo-metric-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+        /* SEO result sections */
+        .seo-result-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.1rem;
+        }
+        .seo-result-section h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-primary);
+        }
+
+        /* keyword pills */
+        .seo-keyword-cloud { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .seo-kw-pill {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        .seo-kw-pill.primary {
+            border-color: rgba(124, 58, 237, 0.4);
+            color: var(--primary);
+            background: rgba(124, 58, 237, 0.07);
+        }
+
+        /* recommendations */
+        .seo-rec-list { list-style: none; display: flex; flex-direction: column; gap: 0.65rem; }
+        .seo-rec-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            padding: 0.85rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .seo-rec-icon { flex-shrink: 0; font-size: 1rem; margin-top: 0.05rem; }
+        .seo-rec-text strong { display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 0.15rem; }
+        .seo-rec-text span { color: var(--text-muted); font-size: 0.8rem; }
+
+        /* raw output */
+        .seo-raw-output {
+            font-family: monospace;
+            font-size: 0.8rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: var(--bg-input);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+
+        /* SEO error box */
+        .seo-error-box {
+            display: none;
+            background: rgba(239, 68, 68, 0.07);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            color: var(--error);
+            font-size: 0.88rem;
+            margin-top: 1rem;
+        }
+        .seo-error-box.visible { display: block; }
+
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .content { margin-left: 0; max-width: 100%; }
+            .tone-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 2rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .tone-grid { grid-template-columns: 1fr 1fr; }
+            .generate-btn { width: 100%; min-width: unset; }
+            .seo-score-section { flex-direction: column; }
+            .seo-metrics-grid { grid-template-columns: 1fr 1fr; }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-feather-alt"></i>
+            BlogGenAI
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">My Blogs</a>
+            <a href="#">Templates</a>
+            <a href="#">Settings</a>
+        </div>
+        <div class="user-menu">
+            <button class="btn btn-ghost"><i class="fas fa-bell"></i></button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-user-circle"></i>
+                Account
+            </button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Main</div>
+                <a href="#" class="sidebar-item active" id="nav-generator" onclick="showView('generator', this); return false;">
+                    <i class="fas fa-magic"></i>
+                    Blog Generator
+                    <span class="badge">NEW</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-save"></i>
+                    Saved Drafts
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">AI Tools</div>
+                <a href="#" class="sidebar-item" id="nav-seo" onclick="showView('seo', this); return false;">
+                    <i class="fas fa-search"></i>
+                    SEO Analyser
+                    <span class="badge">NEW</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    Audience Mode
+                    <span class="soon-badge">Soon</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-line"></i>
+                    Competitor Analyser
+                    <span class="soon-badge">Soon</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-share-alt"></i>
+                    Social Generator
+                    <span class="soon-badge">Soon</span>
+                </a>
+            </div>
+
+            <div class="feature-progress">
+                <h4><i class="fas fa-rocket"></i> Feature Progress</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p>2 of 4 core features active</p>
+            </div>
+        </aside>
+
+        <main class="content">
+
+            <!-- ═══════════════════════════════════════════
+                 VIEW: BLOG GENERATOR
+            ════════════════════════════════════════════ -->
+            <div id="view-generator" class="view">
+                <div class="hero">
+                    <h1>AI Blog Generator</h1>
+                    <p>Generate high-quality, SEO-optimized blog posts in seconds using Google's Gemini AI. Enter your topic and let the magic happen.</p>
+                </div>
+
+                <div class="generator-card">
+                    <div class="generator-header">
+                        <h2><i class="fas fa-wand-magic-sparkles"></i> New Blog Post</h2>
+                        <div class="api-status">
+                            <span class="status-dot"></span>
+                            Gemini API Connected
+                        </div>
+                    </div>
+
+                    <form id="blogForm" onsubmit="return false;">
+                        <div class="form-group">
+                            <label class="form-label">Blog Name / Title <span class="required">*</span></label>
+                            <input type="text" class="form-input" id="topic" placeholder="e.g., The Future of Artificial Intelligence in Healthcare" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Target Audience</label>
+                                <select class="form-select" id="audience">
+                                    <option value="general">General Audience</option>
+                                    <option value="beginners">Beginners / Newcomers</option>
+                                    <option value="professionals">Industry Professionals</option>
+                                    <option value="technical">Technical / Developers</option>
+                                    <option value="executives">Executives / Decision Makers</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Word Count <span>(50 - 5000)</span></label>
+                                <input type="number" class="form-input" id="wordCount" min="50" max="5000" value="500" placeholder="Enter word count">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Key Points / Outline <span>(Optional)</span></label>
+                            <textarea class="form-textarea" id="outline" placeholder="Enter key points you want covered, one per line..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Writing Tone</label>
+                            <div class="tone-grid">
+                                <div class="tone-option selected" data-tone="professional">
+                                    <i class="fas fa-briefcase"></i>
+                                    Professional
+                                </div>
+                                <div class="tone-option" data-tone="casual">
+                                    <i class="fas fa-coffee"></i>
+                                    Casual
+                                </div>
+                                <div class="tone-option" data-tone="enthusiastic">
+                                    <i class="fas fa-fire"></i>
+                                    Enthusiastic
+                                </div>
+                                <div class="tone-option" data-tone="educational">
+                                    <i class="fas fa-graduation-cap"></i>
+                                    Educational
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="btn-container" style="margin-top: 2.75rem; margin-bottom: 1.25rem;">
+                            <button type="button" class="btn generate-btn" id="generateBtn">
+                                <span class="spinner"></span>
+                                <span class="btn-text">Generate Blog Post</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="output-section" id="outputSection">
+                        <div class="output-header">
+                            <h3><i class="fas fa-file-alt"></i> Generated Content</h3>
+                            <div class="output-actions">
+                                <button class="btn btn-secondary" onclick="copyContent()">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button class="btn btn-secondary" onclick="downloadContent()">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                                <button class="btn btn-secondary" onclick="regenerateContent()">
+                                    <i class="fas fa-redo"></i> Regenerate
+                                </button>
+                            </div>
+                        </div>
+                        <div class="output-content" id="outputContent"></div>
+                    </div>
+                </div>
+
+                <div class="history-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-clock-rotate-left"></i> Recent Generations</h3>
+                        <button class="btn btn-view">View All</button>
+                    </div>
+                    <div class="history-grid" id="historyGrid">
+                        <div class="history-item">
+                            <div class="history-info">
+                                <h4>10 Tips for Better Python Code</h4>
+                                <p>Generated 2 hours ago • 500 words • Professional tone</p>
+                            </div>
+                            <div class="history-meta">
+                                <span class="history-tag">Technical</span>
+                                <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                            </div>
+                        </div>
+                        <div class="history-item">
+                            <div class="history-info">
+                                <h4>The Beginner's Guide to SEO in 2024</h4>
+                                <p>Generated 5 hours ago • 800 words • Educational tone</p>
+                            </div>
+                            <div class="history-meta">
+                                <span class="history-tag">Marketing</span>
+                                <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                            </div>
+                        </div>
+                        <div class="history-item">
+                            <div class="history-info">
+                                <h4>Why Remote Work is Here to Stay</h4>
+                                <p>Generated 1 day ago • 600 words • Casual tone</p>
+                            </div>
+                            <div class="history-meta">
+                                <span class="history-tag">Business</span>
+                                <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /view-generator -->
+
+
+            <!-- ═══════════════════════════════════════════
+                 VIEW: SEO ANALYSER
+            ════════════════════════════════════════════ -->
+            <div id="view-seo" class="view" style="display:none;">
+                <div class="hero">
+                    <h1>SEO Analyser</h1>
+                    <p>Paste your blog content and get deep SEO insights powered by Gemini AI - keywords, readability, meta tags, and actionable fixes.</p>
+                </div>
+
+                <div class="generator-card">
+                    <div class="generator-header">
+                        <h2><i class="fas fa-search"></i> Analyse Content</h2>
+                        <div class="api-status">
+                            <span class="status-dot"></span>
+                            Gemini API Connected
+                        </div>
+                    </div>
+
+                    <!-- TABS -->
+                    <div class="seo-tab-row">
+                        <button class="seo-tab-btn active" data-tab="content" onclick="seoSwitchTab(this)">
+                            <i class="fas fa-align-left"></i> Paste Content
+                        </button>
+                        <button class="seo-tab-btn" data-tab="url" onclick="seoSwitchTab(this)">
+                            🔗 Analyse URL
+                        </button>
+                    </div>
+
+                    <!-- Tab: Content -->
+                    <div class="seo-tab-panel active" id="seo-tab-content">
+                        <div class="form-group">
+                            <label class="form-label">Blog Title</label>
+                            <input type="text" class="form-input" id="seo-blog-title" placeholder="e.g. 10 Ways to Improve Django Performance"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Blog Content</label>
+                            <textarea class="form-textarea" id="seo-blog-content" style="min-height:160px;" placeholder="Paste your full blog post here..."></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Target Keyword <span>(optional)</span></label>
+                                <input type="text" class="form-input" id="seo-target-keyword" placeholder="e.g. Django performance tips"/>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Target Audience</label>
+                                <select class="form-select" id="seo-audience">
+                                    <option value="general">General</option>
+                                    <option value="developers">Developers</option>
+                                    <option value="marketers">Marketers</option>
+                                    <option value="beginners">Beginners</option>
+                                    <option value="business">Business Owners</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: URL -->
+                    <div class="seo-tab-panel" id="seo-tab-url">
+                        <div class="form-group">
+                            <label class="form-label">Page URL</label>
+                            <input type="url" class="form-input" id="seo-page-url" placeholder="https://yourblog.com/your-post"/>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Target Keyword <span>(optional)</span></label>
+                            <input type="text" class="form-input" id="seo-url-keyword" placeholder="e.g. Django performance tips"/>
+                        </div>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin-top:-.75rem;">Note: URL analysis fetches page content via your Django backend.</p>
+                    </div>
+
+                    <div class="btn-container" style="margin-top:1.5rem;margin-bottom:.5rem;">
+                        <button type="button" class="btn generate-btn" id="seoAnalyseBtn" onclick="runSeoAnalysis()">
+                            <span class="spinner"></span>
+                            <span class="btn-text">Analyse SEO</span>
+                        </button>
+                    </div>
+                    <div class="seo-error-box" id="seo-error-box"></div>
+                </div>
+
+                <!-- SEO RESULTS -->
+                <div id="seo-results" style="display:none;margin-top:1.5rem;">
+
+                    <!-- Score Ring -->
+                    <div class="seo-score-section">
+                        <div class="seo-score-ring-wrap">
+                            <svg width="110" height="110" viewBox="0 0 110 110">
+                                <circle cx="55" cy="55" r="46" fill="none" stroke="var(--border)" stroke-width="9"/>
+                                <circle id="seo-score-arc" cx="55" cy="55" r="46" fill="none"
+                                    stroke="var(--primary)" stroke-width="9"
+                                    stroke-linecap="round"
+                                    stroke-dasharray="289"
+                                    stroke-dashoffset="289"
+                                    transform="rotate(-90 55 55)"
+                                    style="transition: stroke-dashoffset 1s ease, stroke .5s"/>
+                            </svg>
+                            <div class="seo-score-label">
+                                <span class="seo-score-number" id="seo-score-num">0</span>
+                                <span class="seo-score-max">/100</span>
+                            </div>
+                        </div>
+                        <div class="seo-score-meta">
+                            <div class="seo-score-title">Overall SEO Score</div>
+                            <div class="seo-score-verdict" id="seo-score-verdict">—</div>
+                            <div class="seo-score-badges" id="seo-score-badges"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="seo-metrics-grid" id="seo-metrics-grid"></div>
+
+                    <!-- Keywords -->
+                    <div class="seo-result-section">
+                        <h3>🔑 Keyword Analysis</h3>
+                        <div class="seo-keyword-cloud" id="seo-keyword-cloud"></div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="seo-result-section">
+                        <h3>⚡ Recommendations</h3>
+                        <ul class="seo-rec-list" id="seo-rec-list"></ul>
+                    </div>
+
+                    <!-- Meta Suggestions -->
+                    <div class="seo-result-section" id="seo-meta-section">
+                        <h3>🏷️ Meta Tag Suggestions</h3>
+                        <div id="seo-meta-content"></div>
+                    </div>
+
+                    <!-- Raw AI output -->
+                    <details style="margin-top:1rem;">
+                        <summary style="font-size:.78rem;color:var(--text-muted);cursor:pointer;padding:.5rem 0;font-family:monospace;">
+                            View raw Gemini output
+                        </summary>
+                        <div class="seo-result-section" style="margin-top:.75rem;">
+                            <pre class="seo-raw-output" id="seo-raw-output"></pre>
+                        </div>
+                    </details>
+                </div><!-- /seo-results -->
+            </div><!-- /view-seo -->
+
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action completed successfully</span>
+    </div>
+
+    <script>
+        // ══════════════════════════════════════════
+        //  VIEW SWITCHING
+        // ══════════════════════════════════════════
+        function showView(name, clickedEl) {
+            document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
+            document.getElementById('view-' + name).style.display = 'block';
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            if (clickedEl) clickedEl.classList.add('active');
+        }
+
+        // ══════════════════════════════════════════
+        //  BLOG GENERATOR
+        // ══════════════════════════════════════════
+        document.querySelectorAll('.tone-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.tone-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        const outline = document.getElementById('outline');
+        const outlineCount = document.getElementById('outlineCount');
+        if (outline && outlineCount) {
+            outline.addEventListener('input', () => {
+                outlineCount.textContent = outline.value.length;
+            });
+        }
+
+        document.getElementById('generateBtn').addEventListener('click', async function() {
+            const btn = this;
+            const outputSection = document.getElementById('outputSection');
+            const outputContent = document.getElementById('outputContent');
+
+            const topic = document.getElementById('topic').value;
+            if (!topic) { showToast('Please enter a topic first!', 'error'); return; }
+
+            const wordCountInput = document.getElementById('wordCount');
+            let wordCount = parseInt(wordCountInput.value);
+            if (isNaN(wordCount) || wordCount < 50) {
+                showToast('Word count must be at least 50', 'error');
+                wordCountInput.value = 50; return;
+            }
+            if (wordCount > 5000) {
+                showToast('Word count cannot exceed 5000', 'error');
+                wordCountInput.value = 5000; return;
+            }
+
+            const audience   = document.getElementById('audience').value;
+            const outlineText = document.getElementById('outline').value;
+            const tone       = document.querySelector('.tone-option.selected').dataset.tone;
+
+            btn.classList.add('loading');
+            btn.disabled = true;
+            outputSection.classList.remove('visible');
+
+            try {
+                const response = await fetch('/api/generate-blog/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ topic, audience, word_count: wordCount, outline: outlineText, tone })
+                });
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    outputContent.innerHTML = formatContent(data.content);
+                    outputSection.classList.add('visible');
+                    showToast('Blog generated! (' + wordCount + ' words, ' + tone + ' tone)', 'success');
+                    addToHistory(topic, wordCount, tone);
+                } else {
+                    throw new Error(data.error || 'Failed to generate blog');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+                outputContent.innerHTML = `
+                    <div style="text-align:center;padding:3rem;color:var(--text-muted);">
+                        <i class="fas fa-exclamation-triangle" style="font-size:3rem;color:var(--error);margin-bottom:1rem;display:block;"></i>
+                        <h3>Generation Failed</h3>
+                        <p>${error.message}</p>
+                    </div>`;
+                outputSection.classList.add('visible');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        });
+
+        function formatContent(text) {
+            if (!text) return '';
+            return text
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                .replace(/^- (.*$)/gim, '<ul><li>$1</li></ul>')
+                .replace(/\n/gim, '<br>');
+        }
+
+        function copyContent() {
+            const content = document.getElementById('outputContent').innerText;
+            navigator.clipboard.writeText(content).then(() => showToast('Content copied to clipboard!', 'success'));
+        }
+
+        function downloadContent() {
+            const content = document.getElementById('outputContent').innerText;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href = url;
+            a.download = 'blog-post-' + Date.now() + '.md';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Download started!', 'success');
+        }
+
+        function regenerateContent() {
+            document.getElementById('generateBtn').click();
+        }
+
+        function addToHistory(topic, wordCount, tone) {
+            const historyGrid = document.getElementById('historyGrid');
+            const newItem = document.createElement('div');
+            newItem.className = 'history-item';
+            newItem.innerHTML = `
+                <div class="history-info">
+                    <h4>${topic}</h4>
+                    <p>Just now • ${wordCount} words • ${tone} tone</p>
+                </div>
+                <div class="history-meta">
+                    <span class="history-tag">New</span>
+                    <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                </div>`;
+            historyGrid.insertBefore(newItem, historyGrid.firstChild);
+        }
+
+        // ══════════════════════════════════════════
+        //  SEO ANALYSER
+        // ══════════════════════════════════════════
+        function seoSwitchTab(btn) {
+            document.querySelectorAll('.seo-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.seo-tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('seo-tab-' + btn.dataset.tab).classList.add('active');
+        }
+
+        async function runSeoAnalysis() {
+            const btn     = document.getElementById('seoAnalyseBtn');
+            const results = document.getElementById('seo-results');
+            const errBox  = document.getElementById('seo-error-box');
+
+            const activeTab = document.querySelector('.seo-tab-btn.active').dataset.tab;
+            let payload = { mode: activeTab };
+
+            if (activeTab === 'content') {
+                payload.title    = document.getElementById('seo-blog-title').value.trim();
+                payload.content  = document.getElementById('seo-blog-content').value.trim();
+                payload.keyword  = document.getElementById('seo-target-keyword').value.trim();
+                payload.audience = document.getElementById('seo-audience').value;
+                if (!payload.content) { seoShowError('Please paste some content to analyse.'); return; }
+            } else {
+                payload.url     = document.getElementById('seo-page-url').value.trim();
+                payload.keyword = document.getElementById('seo-url-keyword').value.trim();
+                if (!payload.url) { seoShowError('Please enter a URL.'); return; }
+            }
+
+            errBox.classList.remove('visible');
+            results.style.display = 'none';
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                const resp = await fetch('/api/seo-analyze/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify(payload),
+                });
+                const data = await resp.json();
+                if (!resp.ok || data.error) throw new Error(data.error || 'Server error');
+                seoRenderResults(data);
+            } catch (err) {
+                seoShowError(err.message || 'Something went wrong. Check your API key or try again.');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function seoRenderResults(data) {
+    const results = document.getElementById('seo-results');
+
+    // Score ring
+    const score = Math.min(100, Math.max(0, data.score || 0));
+    const arc = document.getElementById('seo-score-arc');
+    const circumference = 289;
+    arc.style.strokeDashoffset = circumference - (circumference * score / 100);
+    arc.style.stroke = score >= 75 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
+
+    let current = 0;
+    const scoreNum = document.getElementById('seo-score-num');
+    const step = () => {
+        current = Math.min(score, current + 2);
+        scoreNum.textContent = current;
+        if (current < score) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+
+    // verdict → headline
+    document.getElementById('seo-score-verdict').textContent = data.headline || data.summary || '';
+
+    // badges — not in API, skip
+    document.getElementById('seo-score-badges').innerHTML = '';
+
+    // Metrics — use "title" and "description" instead of "name" and "note"
+    const grid = document.getElementById('seo-metrics-grid');
+    grid.innerHTML = '';
+    (data.metrics || []).forEach(m => {
+        const status = m.value >= 75 ? 'good' : m.value >= 50 ? 'warn' : 'bad';
+        grid.innerHTML += `
+            <div class="seo-metric-card ${status}">
+                <div class="seo-metric-icon"><i class="fas fa-${m.icon}"></i></div>
+                <div class="seo-metric-name">${m.title}</div>
+                <div class="seo-metric-value">${m.value}/100</div>
+                <div class="seo-metric-note">${m.description || ''}</div>
+            </div>`;
+    });
+
+    // Keywords — use "keywords_found" instead of "keywords"
+    const kwCloud = document.getElementById('seo-keyword-cloud');
+    kwCloud.innerHTML = '';
+    (data.keywords_found || []).forEach((kw, i) => {
+        kwCloud.innerHTML += `<span class="seo-kw-pill ${kw.type === 'primary' ? 'primary' : ''}">${kw.word}</span>`;
+    });
+
+    // Recommendations — use "suggestions" (strings) + "issues" (objects)
+    const recList = document.getElementById('seo-rec-list');
+    recList.innerHTML = '';
+    (data.issues || []).forEach(r => {
+        const icon = r.severity === 'high' ? '🔴' : r.severity === 'medium' ? '🟡' : '🟢';
+        recList.innerHTML += `
+            <li class="seo-rec-item">
+                <span class="seo-rec-icon">${icon}</span>
+                <div class="seo-rec-text">
+                    <strong>${r.title}</strong>
+                    <span>${r.detail}</span>
+                </div>
+            </li>`;
+    });
+    (data.suggestions || []).forEach(s => {
+        recList.innerHTML += `
+            <li class="seo-rec-item">
+                <span class="seo-rec-icon">💡</span>
+                <div class="seo-rec-text"><span>${s}</span></div>
+            </li>`;
+    });
+
+    // Meta — not in API, hide that section
+    document.getElementById('seo-meta-section').style.display = 'none';
+
+    // Raw output — use "full_report"
+    document.getElementById('seo-raw-output').textContent = JSON.stringify(data, null, 2);
+
+    results.style.display = 'block';
+    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+        function seoShowError(msg) {
+            const errBox = document.getElementById('seo-error-box');
+            errBox.textContent = '⚠ ' + msg;
+            errBox.classList.add('visible');
+        }
+
+        function seoEscHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ══════════════════════════════════════════
+        //  SHARED UTILITIES
+        // ══════════════════════════════════════════
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toast.className = 'toast ' + type;
+            toastMessage.textContent = message;
+            toast.querySelector('i').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
