@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogGenAI - AI-Powered Blog Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-input: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --success: #10b981;
+            --error: #ef4444;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+            --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 150%; height: 150%;
+            background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 80%, rgba(217, 70, 239, 0.06) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(-2%, 2%) rotate(1deg); }
+            66% { transform: translate(2%, -1%) rotate(-1deg); }
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo i { font-size: 1.75rem; -webkit-text-fill-color: #6366f1; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.75rem;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+        }
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-input);
+            border-color: var(--primary-light);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+        }
+        .btn-ghost:hover { color: var(--text-primary); }
+        .main-container {
+            display: flex;
+            margin-top: 70px;
+            min-height: calc(100vh - 70px);
+        }
+        .sidebar {
+            width: 280px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            position: fixed;
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+        .sidebar-section { margin-bottom: 1.5rem; }
+        .sidebar-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        .sidebar-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--text-primary);
+        }
+        .sidebar-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        .sidebar-item i { width: 20px; text-align: center; }
+        .sidebar-item .badge {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+        }
+        .sidebar-item .soon-badge {
+            margin-left: auto;
+            background: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+        }
+        .feature-progress {
+            margin-top: auto;
+            padding: 1rem;
+            background: rgba(99, 102, 241, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .feature-progress h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 25%;
+            background: var(--gradient-1);
+            border-radius: 9999px;
+        }
+        .feature-progress p { font-size: 0.75rem; color: var(--text-muted); }
+        .content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 2rem;
+            max-width: calc(100% - 280px);
+        }
+        .hero {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        .generator-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+            box-shadow: var(--shadow-glow);
+        }
+        .generator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .generator-header h2 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .generator-header h2 i { color: var(--primary-light); }
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .form-label span { color: var(--text-muted); font-weight: 400; }
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9375rem;
+            transition: all 0.3s;
+        }
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .char-count {
+            text-align: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .tone-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+        .tone-option {
+            padding: 0.75rem;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.875rem;
+        }
+        .tone-option:hover {
+            border-color: var(--primary-light);
+            background: rgba(99, 102, 241, 0.1);
+        }
+        .tone-option.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary-light);
+        }
+        .tone-option i { display: block; font-size: 1.25rem; margin-bottom: 0.25rem; }
+        .generate-btn {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .generate-btn:hover::before { left: 100%; }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        .generate-btn .spinner {
+            display: none;
+            width: 20px; height: 20px;
+            border: 2px solid transparent;
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .generate-btn.loading .spinner { display: inline-block; }
+        .generate-btn.loading .btn-text { display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .output-section {
+            margin-top: 2rem;
+            display: none;
+        }
+        .output-section.visible {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .output-actions { display: flex; gap: 0.5rem; }
+        .output-content {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            min-height: 300px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .output-content h1, .output-content h2, .output-content h3 {
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.75rem;
+        }
+        .output-content p { margin-bottom: 1rem; }
+        .output-content ul, .output-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .history-section {
+            margin-top: 3rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .section-header h3 { font-size: 1.25rem; }
+        .history-grid { display: grid; gap: 1rem; }
+        .history-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .history-item:hover {
+            border-color: var(--primary-light);
+            transform: translateX(5px);
+        }
+        .history-info h4 { font-size: 0.9375rem; margin-bottom: 0.25rem; }
+        .history-info p { font-size: 0.8125rem; color: var(--text-muted); }
+        .history-meta { display: flex; align-items: center; gap: 1rem; }
+        .history-tag {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+        }
+        .toast {
+            position: fixed;
+            bottom: 2rem; right: 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 9999;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.success { border-color: var(--success); }
+        .toast.error { border-color: var(--error); }
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); }
+            .content { margin-left: 0; max-width: 100%; }
+            .tone-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 2rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .tone-grid { grid-template-columns: 1fr 1fr; }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--bg-input); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-feather-alt"></i>
+            BlogGenAI
+        </div>
+        <div class="nav-links">
+            <a href="#" class="active">Dashboard</a>
+            <a href="#">My Blogs</a>
+            <a href="#">Templates</a>
+            <a href="#">Settings</a>
+        </div>
+        <div class="user-menu">
+            <button class="btn btn-ghost"><i class="fas fa-bell"></i></button>
+            <button class="btn btn-secondary">
+                <i class="fas fa-user-circle"></i>
+                Account
+            </button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Main</div>
+                <a href="#" class="sidebar-item active">
+                    <i class="fas fa-magic"></i>
+                    Blog Generator
+                    <span class="badge">MVP</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-history"></i>
+                    History
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-save"></i>
+                    Saved Drafts
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">AI Tools</div>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-search"></i>
+                    SEO Analyser
+                    <span class="soon-badge">Soon</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    Audience Mode
+                    <span class="soon-badge">Soon</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-line"></i>
+                    Competitor Analyser
+                    <span class="soon-badge">Soon</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-share-alt"></i>
+                    Social Generator
+                    <span class="soon-badge">Soon</span>
+                </a>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">Account</div>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-key"></i>
+                    API Settings
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog"></i>
+                    Preferences
+                </a>
+            </div>
+
+            <div class="feature-progress">
+                <h4><i class="fas fa-rocket"></i> Feature Progress</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p>1 of 4 core features active</p>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="hero">
+                <h1>AI Blog Generator</h1>
+                <p>Generate high-quality, SEO-optimized blog posts in seconds using Google's Gemini AI. Enter your topic and let the magic happen.</p>
+            </div>
+
+            <div class="generator-card">
+                <div class="generator-header">
+                    <h2><i class="fas fa-wand-magic-sparkles"></i> New Blog Post</h2>
+                    <div class="api-status">
+                        <span class="status-dot"></span>
+                        Gemini API Connected
+                    </div>
+                </div>
+
+                <form id="blogForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <label class="form-label">Blog Topic / Title <span>*</span></label>
+                        <input type="text" class="form-input" id="topic" placeholder="e.g., The Future of Artificial Intelligence in Healthcare" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Target Audience</label>
+                            <select class="form-select" id="audience">
+                                <option value="general">General Audience</option>
+                                <option value="beginners">Beginners / Newcomers</option>
+                                <option value="professionals">Industry Professionals</option>
+                                <option value="technical">Technical / Developers</option>
+                                <option value="executives">Executives / Decision Makers</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Word Count <span>(50 - 5000)</span></label>
+                            <input type="number" class="form-input" id="wordCount" min="50" max="5000" value="500" placeholder="Enter word count">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Key Points / Outline <span>(Optional)</span></label>
+                        <textarea class="form-textarea" id="outline" placeholder="Enter key points you want covered, one per line..."></textarea>
+                        <div class="char-count"><span id="outlineCount">0</span> characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Writing Tone</label>
+                        <div class="tone-grid">
+                            <div class="tone-option selected" data-tone="professional">
+                                <i class="fas fa-briefcase"></i>
+                                Professional
+                            </div>
+                            <div class="tone-option" data-tone="casual">
+                                <i class="fas fa-coffee"></i>
+                                Casual
+                            </div>
+                            <div class="tone-option" data-tone="enthusiastic">
+                                <i class="fas fa-fire"></i>
+                                Enthusiastic
+                            </div>
+                            <div class="tone-option" data-tone="educational">
+                                <i class="fas fa-graduation-cap"></i>
+                                Educational
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-primary generate-btn" id="generateBtn">
+                        <span class="spinner"></span>
+                        <span class="btn-text"><i class="fas fa-bolt"></i> Generate Blog Post</span>
+                    </button>
+                </form>
+
+                <div class="output-section" id="outputSection">
+                    <div class="output-header">
+                        <h3><i class="fas fa-file-alt"></i> Generated Content</h3>
+                        <div class="output-actions">
+                            <button class="btn btn-secondary" onclick="copyContent()">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="btn btn-secondary" onclick="downloadContent()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                            <button class="btn btn-secondary" onclick="regenerateContent()">
+                                <i class="fas fa-redo"></i> Regenerate
+                            </button>
+                        </div>
+                    </div>
+                    <div class="output-content" id="outputContent"></div>
+                </div>
+            </div>
+
+            <div class="history-section">
+                <div class="section-header">
+                    <h3><i class="fas fa-clock-rotate-left"></i> Recent Generations</h3>
+                    <button class="btn btn-ghost">View All</button>
+                </div>
+                <div class="history-grid" id="historyGrid">
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>10 Tips for Better Python Code</h4>
+                            <p>Generated 2 hours ago • 500 words • Professional tone</p>
+                        </div>
+                        <div class="history-meta">
+                            <span class="history-tag">Technical</span>
+                            <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                        </div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>The Beginner's Guide to SEO in 2024</h4>
+                            <p>Generated 5 hours ago • 800 words • Educational tone</p>
+                        </div>
+                        <div class="history-meta">
+                            <span class="history-tag">Marketing</span>
+                            <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                        </div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-info">
+                            <h4>Why Remote Work is Here to Stay</h4>
+                            <p>Generated 1 day ago • 600 words • Casual tone</p>
+                        </div>
+                        <div class="history-meta">
+                            <span class="history-tag">Business</span>
+                            <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action completed successfully</span>
+    </div>
+
+    <script>
+        // Tone Selection
+        document.querySelectorAll('.tone-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.tone-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+        // Character Count
+        const outline = document.getElementById('outline');
+        const outlineCount = document.getElementById('outlineCount');
+        outline.addEventListener('input', () => {
+            outlineCount.textContent = outline.value.length;
+        });
+
+        // Generate Button Click Handler
+        document.getElementById('generateBtn').addEventListener('click', async function() {
+            const btn = this;
+            const outputSection = document.getElementById('outputSection');
+            const outputContent = document.getElementById('outputContent');
+            
+            const topic = document.getElementById('topic').value;
+            if (!topic) {
+                showToast('Please enter a topic first!', 'error');
+                return;
+            }
+
+            // Validate word count
+            const wordCountInput = document.getElementById('wordCount');
+            let wordCount = parseInt(wordCountInput.value);
+            
+            if (isNaN(wordCount) || wordCount < 50) {
+                showToast('Word count must be at least 50', 'error');
+                wordCountInput.value = 50;
+                return;
+            }
+            if (wordCount > 5000) {
+                showToast('Word count cannot exceed 5000', 'error');
+                wordCountInput.value = 5000;
+                return;
+            }
+
+            const audience = document.getElementById('audience').value;
+            const outlineText = document.getElementById('outline').value;
+            const tone = document.querySelector('.tone-option.selected').dataset.tone;
+
+            // Show loading
+            btn.classList.add('loading');
+            btn.disabled = true;
+            outputSection.classList.remove('visible');
+
+            try {
+                const response = await fetch('/api/generate-blog/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        topic: topic,
+                        audience: audience,
+                        word_count: wordCount,
+                        outline: outlineText,
+                        tone: tone
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    outputContent.innerHTML = formatContent(data.content);
+                    outputSection.classList.add('visible');
+                    showToast('Blog generated! (' + wordCount + ' words, ' + tone + ' tone)', 'success');
+                    addToHistory(topic, wordCount, tone);
+                } else {
+                    throw new Error(data.error || 'Failed to generate blog');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+                outputContent.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error); margin-bottom: 1rem; display: block;"></i>
+                        <h3>Generation Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+                outputSection.classList.add('visible');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        });
+
+        // Format content with markdown-like rendering
+        function formatContent(text) {
+            if (!text) return '';
+            return text
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                .replace(/^- (.*$)/gim, '<ul><li>$1</li></ul>')
+                .replace(/<<\/ul>\s*<<ul>/g, '')
+                .replace(/\n/gim, '<br>');
+        }
+
+        // Copy Content
+        function copyContent() {
+            const content = document.getElementById('outputContent').innerText;
+            navigator.clipboard.writeText(content).then(() => {
+                showToast('Content copied to clipboard!', 'success');
+            });
+        }
+
+        // Download Content
+        function downloadContent() {
+            const content = document.getElementById('outputContent').innerText;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'blog-post-' + Date.now() + '.md';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Download started!', 'success');
+        }
+
+        // Regenerate
+        function regenerateContent() {
+            document.getElementById('generateBtn').click();
+        }
+
+        // Toast Notification
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = 'toast ' + type;
+            toastMessage.textContent = message;
+            toast.querySelector('i').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+            
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Add to History
+        function addToHistory(topic, wordCount, tone) {
+            const historyGrid = document.getElementById('historyGrid');
+            const newItem = document.createElement('div');
+            newItem.className = 'history-item';
+            newItem.innerHTML = `
+                <div class="history-info">
+                    <h4>${topic}</h4>
+                    <p>Just now • ${wordCount} words • ${tone} tone</p>
+                </div>
+                <div class="history-meta">
+                    <span class="history-tag">New</span>
+                    <button class="btn btn-ghost"><i class="fas fa-ellipsis-vertical"></i></button>
+                </div>
+            `;
+            historyGrid.insertBefore(newItem, historyGrid.firstChild);
+        }
+
+        // CSRF Token Helper
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
