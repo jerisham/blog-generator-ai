@@ -52,7 +52,7 @@
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border-bottom: none;
-            box-shadow: 0 5px 8px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 9px rgba(0, 0, 0, 0.2);
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
             z-index: 1000;
             display: flex;
@@ -64,7 +64,8 @@
             align-items: center;
             gap: 0.75rem;
             font-size: 1.5rem;
-            font-weight: 800;
+            font-weight: 600;
+            font-family: Helvetica;
             background: var(--gradient-1);
             -webkit-background-clip: text;
             background-clip: text;
@@ -102,27 +103,33 @@
             box-shadow: 0 6px 20px rgba(124, 58, 237, 0.25);
         }
         .btn-secondary {
-            background: var(--bg-card);
             color: var(--text-primary);
             border: 1px solid var(--border);
+            font-size: 15px;
         }
         .btn-secondary:hover {
-            background: var(--bg-input);
             color: var(--primary);
-            border-color: var(--primary-light);
+            border-color: var(--primary);
         }
         .btn-ghost {
             color: white;
             background: transparent;
+            size: 15px;
         }
         .btn-ghost:hover { color: var(--primary);}
+        .btn-view {
+            color: black;
+            letter-spacing: 0.4px;
+            background: transparent;
+            size: 15px;
+        }
         .main-container {
             display: flex;
             margin-top: 70px;
             min-height: calc(100vh - 70px);
         }
         .sidebar {
-            width: 280px;
+            width: 270px;
             background: var(--bg-card);
             border-right: 1px solid var(--border);
             padding: 1.5rem;
@@ -208,10 +215,10 @@
         }
         .feature-progress p { font-size: 0.75rem; color: var(--text-muted); }
         .content {
-            margin-left: 280px;
+            margin-left: 270px;
             flex: 1;
             padding: 2rem;
-            max-width: calc(100% - 280px);
+            max-width: calc(100% - 270px);
             background-color: #e3dcff; /* Deeper base lavender */
             background-image: 
                 radial-gradient(at 10% 20%, rgba(186, 176, 253, 0.95) 0px, transparent 60%),  /* Vibrant Periwinkle Blue */
@@ -225,7 +232,7 @@
         }
         .hero {
             text-align: center;
-            padding: 3rem 0 2rem;
+            padding: 2rem 0 2rem;
             margin-bottom: 2rem;
         }
         .hero h1 {
@@ -237,7 +244,7 @@
         }
         .hero p {
             font-size: 1.125rem;
-            color: var(--text-muted);
+            color: rgba(0, 0, 0, 0.7);
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.7;
@@ -246,7 +253,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 1.5rem;
-            padding: 2rem;
+            padding: 1.75rem;
             max-width: 900px;
             margin: 0 auto;
             box-shadow: var(--shadow-glow);
@@ -298,6 +305,7 @@
             color: var(--text-primary);
         }
         .form-label span { color: var(--text-muted); font-weight: 400; }
+        .form-label span.required { color: var(--error); font-weight: 400; }
         .form-input, .form-textarea, .form-select {
             width: 100%;
             padding: 0.875rem 1rem;
@@ -365,10 +373,11 @@
         }
         .generate-btn {
             width: auto;
+            height: 50px;
             min-width: 240px;
             padding: 0.875rem 2.5rem;
             font-size: 0.95rem;
-            border-radius: 50px;
+            border-radius: 8px;
             display: inline-flex;
             justify-content: center;
             align-items: center;
@@ -435,12 +444,14 @@
             color: var(--text-primary);
         }
         .output-content h1, .output-content h2, .output-content h3 {
-            color: var(--primary-dark);
-            margin: 1.5rem 0 0.75rem;
+            color: black;
+            margin-top: 0px !important;
+            margin-bottom: 4px !important;
+            line-height: 1.2 !important;
         }
         .output-content p { margin-bottom: 1rem; }
         .output-content ul, .output-content ol {
-            margin-left: 1.5rem;
+            margin-left: 1rem;
             margin-bottom: 1rem;
         }
         .history-section {
@@ -508,7 +519,7 @@
         }
         .toast.success { border-color: var(--success); }
         .toast.error { border-color: var(--error); }
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
             .sidebar { transform: translateX(-100%); }
             .content { margin-left: 0; max-width: 100%; }
             .tone-grid { grid-template-columns: repeat(2, 1fr); }
@@ -591,18 +602,6 @@
                 </a>
             </div>
 
-            <div class="sidebar-section">
-                <div class="sidebar-title">Account</div>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-key"></i>
-                    API Settings
-                </a>
-                <a href="#" class="sidebar-item">
-                    <i class="fas fa-cog"></i>
-                    Preferences
-                </a>
-            </div>
-
             <div class="feature-progress">
                 <h4><i class="fas fa-rocket"></i> Feature Progress</h4>
                 <div class="progress-bar">
@@ -629,7 +628,7 @@
 
                 <form id="blogForm" onsubmit="return false;">
                     <div class="form-group">
-                        <label class="form-label">Blog Name / Title <span>*</span></label>
+                        <label class="form-label">Blog Name / Title <span class="required">*</span></label>
                         <input type="text" class="form-input" id="topic" placeholder="e.g., The Future of Artificial Intelligence in Healthcare" required>
                     </div>
 
@@ -653,7 +652,6 @@
                     <div class="form-group">
                         <label class="form-label">Key Points / Outline <span>(Optional)</span></label>
                         <textarea class="form-textarea" id="outline" placeholder="Enter key points you want covered, one per line..."></textarea>
-                        <div class="char-count"><span id="outlineCount">0</span> characters</div>
                     </div>
 
                     <div class="form-group">
@@ -678,7 +676,7 @@
                         </div>
                     </div>
 
-                    <div class="btn-container">
+                    <div class="btn-container" style="margin-top: 2.75rem; margin-bottom: 1.25rem;">
                         <button type="button" class="btn generate-btn" id="generateBtn">
                             <span class="spinner"></span>
                             <span class="btn-text">Generate Blog Post</span>
@@ -708,7 +706,7 @@
             <div class="history-section">
                 <div class="section-header">
                     <h3><i class="fas fa-clock-rotate-left"></i> Recent Generations</h3>
-                    <button class="btn btn-ghost">View All</button>
+                    <button class="btn btn-view">View All</button>
                 </div>
                 <div class="history-grid" id="historyGrid">
                     <div class="history-item">
