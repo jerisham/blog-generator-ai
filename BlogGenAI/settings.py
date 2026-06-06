@@ -61,7 +61,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
+    'core',    
+    
 ]
 
 MIDDLEWARE = [
@@ -136,10 +137,18 @@ USE_I18N = True
 USE_TZ = True
 
 
+from dotenv import load_dotenv
+import os
+load_dotenv()
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
 
 from dotenv import load_dotenv
-load_dotenv(BASE_DIR / '.env')
+import os
+load_dotenv(os.path.join(BASE_DIR, '..', '.env'))
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
